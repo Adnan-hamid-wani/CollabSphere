@@ -23,3 +23,4 @@ Thumbs.db
 # Optional: ignore output folders or test coverage
 **/coverage/
 **/.turbo/
+.env
