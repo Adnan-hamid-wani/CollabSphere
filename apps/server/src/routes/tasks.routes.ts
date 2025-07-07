@@ -7,17 +7,15 @@ import {
   rejectTask,
   getAllColumnsWithTasks,
   markAsCompleted,
+  getUsers,
 } from "../controllers/task.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { isAdmin } from "../middlewares/isAdmin.middlwware"; // import the isAdmin middlee";
-
+import { isAdmin } from "../middlewares/isAdmin.middlwware";
 import { RequestHandler } from "express";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
 const router = Router();
 
-// 🔐 Authenticate all routes
+// Authenticate all routes
 router.use((req, res, next) => {
   Promise.resolve(authenticate(req, res, next)).catch(next);
 });
@@ -28,11 +26,9 @@ router.post("/", isAdmin as RequestHandler, (req, res, next) => {
 
 router.put("/:id", isAdmin as RequestHandler, (req, res, next) => {
   Promise.resolve(updateTask(req, res)).catch(next);
-  
 });
 
-
-router.delete("/:id",isAdmin as RequestHandler, (req, res, next) => {
+router.delete("/:id", isAdmin as RequestHandler, (req, res, next) => {
   Promise.resolve(deleteTask(req, res)).catch(next);
 });
 
@@ -51,14 +47,14 @@ router.put("/:id/reject", isAdmin as RequestHandler, (req, res, next) => {
 router.get("/columns", (req, res, next) => {
   Promise.resolve(getAllColumnsWithTasks(req, res)).catch(next);
 });
+
 router.get("/", async (_req, res) => {
   try {
-    const users = await prisma.user.findMany({
-      select: { id: true, email: true }
-    });
+    const users = getUsers();
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch users" });
   }
 });
+
 export default router;
