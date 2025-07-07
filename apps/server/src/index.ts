@@ -7,6 +7,7 @@ import userRoutes from "./routes/tasks.routes";
 import http from "http";
 import { Server } from "socket.io";
 import { addUser } from "./controllers/task.controller";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
@@ -41,24 +42,35 @@ io.on("connection", (socket) => {
 
 app.set("io", io);
 
-// Add some default users for testing
-addUser({
-  id: 1,
-  email: "admin@example.com",
-  username: "admin",
-  password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
-  role: "ADMIN",
-  createdAt: new Date(),
-});
+// Add some default users for testing with properly hashed passwords
+const initializeDefaultUsers = async () => {
+  const hashedPassword = await bcrypt.hash("password", 10);
+  
+  addUser({
+    id: 1,
+    email: "admin@example.com",
+    username: "admin",
+    password: hashedPassword,
+    role: "ADMIN",
+    createdAt: new Date(),
+  });
 
-addUser({
-  id: 2,
-  email: "user@example.com",
-  username: "user",
-  password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
-  role: "USER",
-  createdAt: new Date(),
-});
+  addUser({
+    id: 2,
+    email: "user@example.com",
+    username: "user",
+    password: hashedPassword,
+    role: "USER",
+    createdAt: new Date(),
+  });
+
+  console.log("✅ Default users initialized:");
+  console.log("Admin: admin@example.com / password");
+  console.log("User: user@example.com / password");
+};
+
+// Initialize default users
+initializeDefaultUsers();
 
 // API routes must come after CORS and socket setup
 app.use("/api/auth", authRoutes);
