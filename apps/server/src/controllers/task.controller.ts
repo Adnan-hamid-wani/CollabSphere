@@ -17,7 +17,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: "Title and assigned user's email are required" });
   }
 
-  // Find user by email (you'll need to implement user storage)
+  // Find user by email
   const user = users.find(u => u.email === assignedToEmail);
 
   if (!user) {
@@ -228,9 +228,16 @@ export const getAllColumnsWithTasks = async (req: AuthRequest, res: Response) =>
 // Helper function to add users (for testing)
 export const addUser = (user: any) => {
   users.push(user);
+  console.log("User added:", user);
+  console.log("Total users:", users.length);
 };
 
-// Helper function to get users
+// Helper function to get users - return full user objects with passwords for auth
 export const getUsers = () => {
+  return users;
+};
+
+// Helper function to get users for API (without passwords)
+export const getUsersForAPI = () => {
   return users.map(user => ({ id: user.id, email: user.email, username: user.username }));
 };

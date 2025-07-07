@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
-// Temporary in-memory storage
-const users: any[] = [];
-let userIdCounter = 1;
+import { getUsers, addUser } from "./task.controller";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 export const register = async (req: Request, res: Response): Promise<Response> => {
   const { email, username, password, role } = req.body;
 
+  // Get users from shared storage
+  const users = getUsers();
+  
   // Check if user already exists
   const existingUser = users.find(user => user.email === email);
   if (existingUser) return res.status(400).json({ message: "Email already exists" });
@@ -18,7 +18,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = {
-    id: userIdCounter++,
+    id: users.length + 1,
     email,
     username,
     password: hashedPassword,
@@ -26,7 +26,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
     createdAt: new Date(),
   };
 
-  users.push(user);
+  addUser(user);
 
   const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
 
@@ -42,8 +42,11 @@ export const login = async (req: Request, res: Response) => {
 
   const { email, password } = req.body;
 
+  // Get users from shared storage
+  const users = getUsers();
   const user = users.find(u => u.email === email);
-  console.log("User from memory:", user);
+  console.log("User from shared storage:", user);
+  console.log("All users:", users);
 
   if (!user) return res.status(400).json({ message: 'User not found' });
 

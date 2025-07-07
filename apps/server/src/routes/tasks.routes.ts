@@ -7,7 +7,7 @@ import {
   rejectTask,
   getAllColumnsWithTasks,
   markAsCompleted,
-  getUsers,
+  getUsersForAPI,
 } from "../controllers/task.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { isAdmin } from "../middlewares/isAdmin.middlwware";
@@ -50,7 +50,7 @@ router.get("/columns", (req, res, next) => {
 
 router.get("/", async (_req, res) => {
   try {
-    const users = getUsers();
+    const users = getUsersForAPI();
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch users" });
